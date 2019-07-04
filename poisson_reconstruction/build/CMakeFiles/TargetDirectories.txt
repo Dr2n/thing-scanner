@@ -1,0 +1,3 @@
+/home/xiaoyi/ar&3d project/build/CMakeFiles/rebuild_cache.dir
+/home/xiaoyi/ar&3d project/build/CMakeFiles/main.dir
+/home/xiaoyi/ar&3d project/build/CMakeFiles/edit_cache.dir
