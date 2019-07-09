@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Thing Scanner</title>
+        <link rel="stylesheet" href="./styles.css">
+    </head>
+    <body>
+        <h1>Thing Scanner</h1>
+        <ol>
+            <li>Provide a video of the target object</li>
+            <li>Provide email to send model to</li>
+            <li>Press submit</li>
+        </ol>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="video" accept="video/*">
+            <input type="email" name="send_address" placeholder="email">
+            <input type="submit" id="submit-button">
+        </form>
+    </body>
+</html>
