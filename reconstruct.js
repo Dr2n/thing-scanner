@@ -138,7 +138,28 @@ module.exports = function (videoName, err) {
     
     function poissonSurface() {
         return new Promise((resolve, reject) => {
-            resolve()
+            const poissonJob = spawn(config["poisson-location"], [
+                `models/${uuid}.ply`,
+                `models/${uuid}-surface.ply`
+            ])
+
+            poissonJob.stdout.on('data', (data) => {
+                console.log(`poisson-surface stdout:  ${data}`)
+            })
+        
+            poissonJob.stderr.on('data', (data) => {
+                console.log(`poisson-surface stderr:  ${data}`)
+            })
+        
+            poissonJob.on('close', (exitCode) => {
+                console.log(`poisson-surface closed with exit code ${exitCode}`)
+                if (exitCode != 0) {
+                    reject(`poisson-surface exited with error code: ${exitCode}`)
+                } else {
+                    console.log('Successfully converted to surface!')
+                    resolve()
+                }
+            })
         })
     }
 }
