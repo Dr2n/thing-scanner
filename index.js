@@ -19,7 +19,7 @@ server.post('/upload', (req, res) => {
     let extension = video.name.split('.').slice(-1)[0]
     let id = uuid()
     let newVideoName = `${id}.${extension}`
-    video.mv(`.//videos/${newVideoName}`, (err) => {
+    video.mv(`./videos/${newVideoName}`, (err) => {
         if (err) {
             return res.status(500).send(err)
         }
