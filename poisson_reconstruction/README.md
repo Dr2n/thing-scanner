@@ -1,0 +1,1 @@
+should change open cv library location in CMakeLists.txt

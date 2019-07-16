@@ -1,0 +1,21 @@
+body {
+    padding: 0;
+    margin: 30px;
+    font-family: sans-serif;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    width: 300px;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+#submit-button {
+    font-size: 24px;
+    padding: 5px 15px;
+}
