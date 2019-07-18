@@ -145,9 +145,10 @@ module.exports = function (videoName, err) {
     
     function poissonSurface() {
         return new Promise((resolve, reject) => {
+            let outputPath = `./models/${uuid}-surface.ply` 
             const poissonJob = spawn(config["poisson-location"], [
-                `models/${uuid}.ply`,
-                `models/${uuid}-surface.ply`
+                `./models/${uuid}.ply`,
+                outputPath
             ])
 
             poissonJob.stdout.on('data', (data) => {
@@ -164,16 +165,19 @@ module.exports = function (videoName, err) {
                     reject(`poisson-surface exited with error code: ${exitCode}`)
                 } else {
                     console.log('Successfully converted to surface!')
-                    resolve()
+                    resolve(outputPath)
                 }
             })
         })
     }
 
-    function blenderUVMap() {
+    function blenderUVMap(modelPath) {
         return new Promise((resolve, reject) => {
+            let outputPath = `./models/${uuid}-mapped.obj`
             const blenderJob = spawn(config["blender-location"], [
-                config['blender-script-location'],
+                './uv-mapping-gen.py',
+                modelPath,
+                outputPath
             ])
 
             blenderJob.stdout.on('data', (data) => {
@@ -190,17 +194,17 @@ module.exports = function (videoName, err) {
                     reject(`blender exited with error code: ${exitCode}`)
                 } else {
                     console.log('Successfully added UV Map!')
-                    resolve()
+                    resolve(outputPath)
                 }
             })
         })
     }
 
-    function generateTextureAtlas() {
+    function generateTextureAtlas(modelPath) {
         return new Promise((resolve, reject) => {
             const textureAtlasJob = spawn("python3", [
                 "./renderer/render-model.py",
-                `./models/${uuid}-surface.obj`,
+                modelPath,
                 "./colmap-workspace/images.txt",
                 "./frames/",
                 `./models/${uuid}-texture.png`
