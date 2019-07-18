@@ -14,9 +14,6 @@ SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 #header file
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/include)
 
-#opencv library
-set(OpenCV_DIR "/home/xiaoyi/opencv/opencv/build")
-FIND_PACKAGE( OpenCV REQUIRED)
 
 #pcl library
 FIND_PACKAGE( PCL REQUIRED )
@@ -24,7 +21,7 @@ ADD_DEFINITIONS(${PCL_DEFINITIONS})
 INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS})
 LINK_LIBRARIES( ${PCL_LIBRARY_DIRS})
 
-SET(SOURCES src/main.cpp src/load_data.cpp)
+SET(SOURCES src/main.cpp src/load_data.cpp src/poisson.cpp)
 
 add_executable(main ${SOURCES})
 TARGET_LINK_LIBRARIES(main ${OpenCV_LIBS} ${PCL_LIBRARIES})

@@ -1,0 +1,10 @@
+board_size: {x: 8, y: 9}
+depth_scale_factor: 0.0001
+export_time: '2014-05-19 12:44:35.879995'
+has_poisson_mesh: true
+has_tsdf_mesh: true
+id: 5
+name: detergent
+set: set_05_02_05_03PM
+square_size: 0.018923
+version: 1

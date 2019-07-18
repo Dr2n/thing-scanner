@@ -1,72 +1,57 @@
-#include "load_data.h"
+#include "utils.h"
 
-#include <pcl/surface/poisson.h>
-#include <pcl/features/normal_3d_omp.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/registration/icp.h>
 
 //given a point cloud, do poisson reconstruction
 
-int main(){
+int main(int argc, char **argv){
 
-    std::cout<<" this is a file for poisson reconstruction! "<<std::endl;
+    //***************************************   arguments   ********************************************//
 
-    std::string data_path = "../data/test_mesh_1.ply";
+    std::string data_path, outfile_path;
 
-    //new point cloud
-    PointCloud::Ptr cloud(new PointCloud);
-
-    //load ply file
-    cloud = load_ply(data_path);
-
-    //load file
-    //pcl::PCDReader reader;
-    //reader.read(file_path,*cloud);
-
-    pcl::visualization::CloudViewer viewer("cloud viewer");
-    viewer.showCloud(cloud);
-
-    //estimate local surface properties
-    pcl::NormalEstimationOMP<POINT, pcl::Normal> normal_estimator;
-    pcl::PointCloud<pcl::Normal>::Ptr normal_cloud(new pcl::PointCloud<pcl::Normal>);
-
-    normal_estimator.setInputCloud(cloud);
-
-    pcl::search::KdTree<POINT>::Ptr tree(new pcl::search::KdTree<POINT>);
-    tree->setInputCloud(cloud);
-    normal_estimator.setSearchMethod(tree);
-    normal_estimator.setKSearch(20);
-
-    Eigen::Vector4f center;
-    pcl::compute3DCentroid(*cloud, center);
-    normal_estimator.setViewPoint(center[0],center[1],center[2]);
-
-    normal_estimator.compute(*normal_cloud);
-
-    for(size_t i=0;i<normal_cloud->size();i++)
+    if(argc < 2)
     {
-        normal_cloud->points[i].normal_x *= -1;
-        normal_cloud->points[i].normal_y *= -1;
-        normal_cloud->points[i].normal_z *= -1;
-
+        std::cout<<"too few arguments!"<<std::endl;
+        std::cout<<"first param: data path"<<std::endl;
+        std::cout<<"second param: output file path"<<std::endl;
     }
-    std::cout<<"normal computed!"<<std::endl;
 
-    //concatenate normal and points
-    pcl::PointCloud<pcl::PointNormal>::Ptr combined_cloud(new pcl::PointCloud<pcl::PointNormal>);
-    pcl::concatenateFields(*cloud, *normal_cloud, *combined_cloud);
+    data_path = argv[1];
+    outfile_path = argv[2];
 
-    //poisson reconstruction
-    pcl::Poisson<pcl::PointNormal> poisson;
-    poisson.setInputCloud(combined_cloud);
 
-    //output polynom
-    pcl::PolygonMesh mesh;
-    poisson.reconstruct(mesh);
+    //load optimized rgb textured point cloud
+    rgbPointCloud::Ptr rgb_joint_cloud(new rgbPointCloud);
+    rgb_joint_cloud = loadPlyFile_RGBPoint(data_path);
 
-    std::cout<<"reconstructed!"<<std::endl;
+    //*************************************   pcl cloud viewer   *******************************************//
+    //point cloud viewer
+    pcl::visualization::CloudViewer viewer("cloud viewer");
 
-    pcl::io::savePLYFile("reconstructed_mesh.ply", mesh);
-    std::cout<<"file saved!"<<std::endl;
+   //*****************************   poisson reconstruction   ************************************//
+
+   //convert rgbPointCloud to xyzPointCloud
+   //poisson reconstruction only works with xyzPointCloud
+   xyzPointCloud::Ptr joint_cloud(new xyzPointCloud);
+   pcl::copyPointCloud(*rgb_joint_cloud,*joint_cloud);
+
+   //call poisson reconstruction function
+   pcl::PolygonMesh mesh;
+   mesh = poissonReconstuction(joint_cloud);
+   std::cout<<"reconstructed!"<<std::endl;
+
+   //**********************************  texturing  **********************************************//
+
+   //call texturing function
+   //texture mesh with rgb color
+   mesh = meshTexturing(mesh,rgb_joint_cloud);
+
+
+   //*********************************   save file   *********************************************//
+   pcl::io::savePLYFile(outfile_path, mesh);
+   std::cout<<"file saved!"<<std::endl;
 
     return 0;
 }
