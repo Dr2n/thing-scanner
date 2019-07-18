@@ -13,10 +13,16 @@ module.exports = function (videoName, err) {
     ffmpegJob(videoName)
     // use colmap to do sparse reconstruction, output .ply file
     .then(sparseReconstruction)
+    // export image pose data
+    .then(exportImageData)
     // use colmap to export as .PLY
     .then(exportModel)
     // call poisson reconstruction program to create surface
     .then(poissonSurface)
+    // use blender to add a UV map
+    .then(blenderUVMap)
+    // generate texture atlas
+    .then(generateTextureAtlas)
     // put created model into a folder
     .catch(err => {
         console.log(err)
@@ -78,28 +84,29 @@ module.exports = function (videoName, err) {
         })
     }
 
-    function sparseReconstruction() {
+    function exportImageData() {
         return new Promise((resolve, reject) => {
             const colmapJob = spawn(config["colmap-location"], [
-                'automatic_reconstructor', 
-                '--workspace_path', './colmap-workspace',
-                '--image_path', './frames'
+                'model_converter', 
+                '--input_path', './colmap-workspace/sparse/0',
+                '--output_path', './colmap-workspace',
+                '--output_type', 'TXT'
             ])
 
             colmapJob.stdout.on('data', (data) => {
-                console.log(`colmap stdout:  ${data}`)
+                console.log(`image data export stdout:  ${data}`)
             })
         
             colmapJob.stderr.on('data', (data) => {
-                console.log(`colmap stderr:  ${data}`)
+                console.log(`image data export stderr:  ${data}`)
             })
         
             colmapJob.on('close', (exitCode) => {
-                console.log(`colmap closed with exit code ${exitCode}`)
+                console.log(`image data export closed with exit code ${exitCode}`)
                 if (exitCode != 0) {
-                    reject(`colmap exited with error code: ${exitCode}`)
+                    reject(`image data export exited with error code: ${exitCode}`)
                 } else {
-                    console.log('Sparse model reconstruction completed successfully!')
+                    console.log('Image data export completed successfully!')
                     resolve()
                 }
             })
@@ -157,6 +164,61 @@ module.exports = function (videoName, err) {
                     reject(`poisson-surface exited with error code: ${exitCode}`)
                 } else {
                     console.log('Successfully converted to surface!')
+                    resolve()
+                }
+            })
+        })
+    }
+
+    function blenderUVMap() {
+        return new Promise((resolve, reject) => {
+            const blenderJob = spawn(config["blender-location"], [
+                config['blender-script-location'],
+            ])
+
+            blenderJob.stdout.on('data', (data) => {
+                console.log(`blender stdout:  ${data}`)
+            })
+        
+            blenderJob.stderr.on('data', (data) => {
+                console.log(`blender stderr:  ${data}`)
+            })
+        
+            blenderJob.on('close', (exitCode) => {
+                console.log(`blender closed with exit code ${exitCode}`)
+                if (exitCode != 0) {
+                    reject(`blender exited with error code: ${exitCode}`)
+                } else {
+                    console.log('Successfully added UV Map!')
+                    resolve()
+                }
+            })
+        })
+    }
+
+    function generateTextureAtlas() {
+        return new Promise((resolve, reject) => {
+            const textureAtlasJob = spawn("python3", [
+                "./renderer/render-model.py",
+                "./colmap-workspace/images.txt",
+                "./frames",
+                `./models/${uuid}-texture.png`
+            ])
+
+            textureAtlasJob.stdout.on('data', (data) => {
+                console.log(`python stdout:  ${data}`)
+            })
+        
+            textureAtlasJob.stderr.on('data', (data) => {
+                console.log(`python stderr:  ${data}`)
+            })
+        
+            textureAtlasJob.on('close', (exitCode) => {
+                console.log(`python closed with exit code ${exitCode}`)
+                if (exitCode != 0) {
+                    reject(`python exited with error code: ${exitCode}`)
+                } else {
+                    console.log('Successfully generated texture atlas!')
                     resolve()
                 }
             })
