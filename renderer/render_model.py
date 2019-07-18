@@ -119,6 +119,7 @@ print(str(sys.argv))
 # load cli arguments
 if (len(sys.argv) != 5):
     print('Incorrect number of arguments given. I will now exit.')
+    sys.exit(1)
 
 objPath = sys.argv[1]
 txtPath = sys.argv[2]
