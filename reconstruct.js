@@ -200,8 +200,9 @@ module.exports = function (videoName, err) {
         return new Promise((resolve, reject) => {
             const textureAtlasJob = spawn("python3", [
                 "./renderer/render-model.py",
+                `./models/${uuid}-surface.obj`,
                 "./colmap-workspace/images.txt",
-                "./frames",
+                "./frames/",
                 `./models/${uuid}-texture.png`
             ])
 
