@@ -38,7 +38,7 @@ def quaternion_to_euler(x, y, z, w):
 
     return X, Y, Z
 
-def averageColor(colorArray)
+def averageColor(colorArray):
     rSum, gSum, bSum, aSum = 0, 0, 0, 0
     pixelCount = len(colorArray)
     for i in range(pixelCount):
@@ -89,7 +89,7 @@ def renderFrame(width, height, camPosition, camRotation):
     glReadBuffer(GL_COLOR_ATTACHMENT0) 
     buffer = glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, output)
 
-    return image = Image.frombytes(mode="RGBA", size=(width, height), data=buffer)
+    return Image.frombytes(mode="RGBA", size=(width, height), data=buffer)
     # image.save("out.png")
 
     # magic.drawCoordinateSystem(viewToClipTransform, worldToViewTransform)
@@ -136,7 +136,7 @@ if not glfw.init():
 textureImage = Image.open(atlasPath)
 textureWidth = textureImage.size[0]
 textureHeight = textureImage.size[1]
-textureAtlas = [[[] for x in range(w)] for y i range(textureHeight)]
+textureAtlas = [[[] for x in range(textureWidth)] for y in range(textureHeight)]
 
 # init params
 g_yFovDeg = fovCalc(32)
@@ -189,6 +189,6 @@ with open(txtPath, 'r') as fp:
 fp.close()
 
  # export texture atlas
- textureImage.save(outputPath)
- print("Successfully generated texture atlas")
+textureImage.save(outputPath)
+print("Successfully generated texture atlas")
 
