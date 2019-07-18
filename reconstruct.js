@@ -9,7 +9,6 @@ module.exports = function (videoName, err) {
     console.log(`Processing video ${uuid}...`)
 
     // use ffmpeg to split the video into frame images
-    // ffmpeg -i test-video.avi -vf "select=not(mod(n\,5))" -vsync vfr -q:v 2 img_%03d.jpg
     ffmpegJob(videoName)
     // use colmap to do sparse reconstruction, output .ply file
     .then(sparseReconstruction)
@@ -173,11 +172,19 @@ module.exports = function (videoName, err) {
 
     function blenderUVMap(modelPath) {
         return new Promise((resolve, reject) => {
-            let outputPath = `./models/${uuid}-mapped.obj`
+            // /Applications/Blender/blender.app/Contents/MacOS/blender --background --python ./uv_mapping_gen.py ./models/detergent-surface.ply ./models/detergent-texture ./models/detergent-mapped.obj
+            let outputPaths = {
+                texture: `./models/${uuid}-texture`, 
+                obj: `./models/${uuid}-mapped.obj`
+            }
+
             const blenderJob = spawn(config["blender-location"], [
+                '--background',
+                '--python',
                 './uv-mapping-gen.py',
                 modelPath,
-                outputPath
+                outputPaths[0],
+                outputPaths[1]
             ])
 
             blenderJob.stdout.on('data', (data) => {
@@ -194,7 +201,7 @@ module.exports = function (videoName, err) {
                     reject(`blender exited with error code: ${exitCode}`)
                 } else {
                     console.log('Successfully added UV Map!')
-                    resolve(outputPath)
+                    resolve(outputPaths)
                 }
             })
         })
@@ -204,7 +211,8 @@ module.exports = function (videoName, err) {
         return new Promise((resolve, reject) => {
             const textureAtlasJob = spawn("python3", [
                 "./renderer/render-model.py",
-                modelPath,
+                modelPaths.texture,
+                modelPaths.obj,
                 "./colmap-workspace/images.txt",
                 "./frames/",
                 `./models/${uuid}-texture.png`

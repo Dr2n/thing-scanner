@@ -121,22 +121,26 @@ if (len(sys.argv) != 5):
     print('Incorrect number of arguments given. I will now exit.')
     sys.exit(1)
 
-objPath = sys.argv[1]
-txtPath = sys.argv[2]
-cameraImagesFolder = sys.argv[3]
-outputPath = sys.argv[4]
+atlasPath = sys.argv[1]
+objPath = sys.argv[2]
+txtPath = sys.argv[3]
+cameraImagesFolder = sys.argv[4]
+outputPath = sys.argv[5]
 
 # create imgui context
 imgui.create_context()
 if not glfw.init():
     sys.exit(1)
 
+# open textureAtlas
+textureImage = Image.open(atlasPath)
+textureWidth = textureImage.size[0]
+textureHeight = textureImage.size[1]
+textureAtlas = [[[] for x in range(w)] for y i range(textureHeight)]
+
 # init params
 g_yFovDeg = fovCalc(32)
 window, impl = None, None
-textureWidth = 10 # ????
-textureHeight = 10 # ????
-textureAtlas = [[[] for x in range(w)] for y i range(textureHeight)]
 
 # look through images.txt
 with open(txtPath, 'r') as fp:
@@ -175,7 +179,6 @@ with open(txtPath, 'r') as fp:
                     textureAtlas[u, v].append(cameraPixels[i, j])
 
             # create texture atlas image
-            textureImage = Image.new("RGBA", (textureWidth, textureHeight))
             texturePixels = textureImage.load()
             # for pixel in image, set as average of colours
             for i in range(len(textureAtlas)):
