@@ -1,4 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+# localize the PCLConfig.cmake file in the following line!
+SET(PCL_DIR "/usr/local/Cellar/pcl/1.9.1_4/cmake/PCLConfig.cmake")
+
 PROJECT(ar)
 
 #complier
