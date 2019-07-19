@@ -148,7 +148,7 @@ window, impl = None, None
 
 # look through images.txt
 print("Scanning through images.txt...")
-with open(txtPath, 'r') as fp:
+with open(txtPath, 'r', encoding="utf8") as fp:
     # for each line
     ln = fp.readline()
     count = 1
@@ -170,7 +170,7 @@ with open(txtPath, 'r') as fp:
                 float(ln[4])
             )
 
-            x, y, z = float(ln[5]), float(ln[6]), float(ln[7])
+            x, y, z= float(ln[5]), float(ln[6]), float(ln[7])
             # render model from camera pose
             uvMap = renderFrame(cameraImage.size[0], cameraImage.size[1], (x, y, z), (rx, ry, rz))
             print([x, y, z], [rx, ry, rz])

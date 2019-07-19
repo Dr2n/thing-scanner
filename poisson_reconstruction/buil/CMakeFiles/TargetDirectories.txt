@@ -1,0 +1,3 @@
+/home/m/ws/thing-scanner/poisson_reconstruction/buil/CMakeFiles/rebuild_cache.dir
+/home/m/ws/thing-scanner/poisson_reconstruction/buil/CMakeFiles/main.dir
+/home/m/ws/thing-scanner/poisson_reconstruction/buil/CMakeFiles/edit_cache.dir
