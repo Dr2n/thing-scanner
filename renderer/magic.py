@@ -5,6 +5,7 @@ import numpy as np
 from ctypes import sizeof, c_float, c_void_p, c_uint, string_at
 import math
 import sys
+import os
 
 import imgui
 
@@ -520,8 +521,10 @@ def initGlFwAndResources(title, startWidth, startHeight, initResources):
 
     if initResources:
         initResources()
-
-    g_coordinateSystemModel = ObjModel("data/coordinate_system.obj");
+    
+    script_dir = os.path.dirname(__file__)
+    modelPath = "./data/coordinate_system.obj"
+    g_coordinateSystemModel =  ObjModel(os.path.join(script_dir, modelPath))
 
     return window,impl
 

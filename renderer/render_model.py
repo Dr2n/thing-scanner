@@ -5,6 +5,7 @@ import math
 import numpy as np
 import time
 import imgui
+import glfw
 
 import magic
 # We import the 'lab_utils' module as 'lu' to save a bit of typing while still clearly marking where the code came from.
@@ -22,7 +23,7 @@ g_model = None
 def fovCalc(focalLength):
     return 180/math.pi * 2 * math.atan(12/focalLength)
 
-def quaternion_to_euler(x, y, z, w):
+def quarternion_to_euler(x, y, z, w):
     t0 = +2.0 * (w * x + y * z)
     t1 = +1.0 - 2.0 * (x * x + y * y)
     X = math.degrees(math.atan2(t0, t1))
@@ -41,12 +42,13 @@ def quaternion_to_euler(x, y, z, w):
 def averageColor(colorArray):
     rSum, gSum, bSum, aSum = 0, 0, 0, 0
     pixelCount = len(colorArray)
+    if pixelCount == 0: return (0, 0, 0, 0)
     for i in range(pixelCount):
         rSum += colorArray[i][0]
         gSum += colorArray[i][1]
         bSum += colorArray[i][2]
         aSum += colorArray[i][3]
-    return [rSum/pixelCount, gSum/pixelCount, bSum/pixelCount, aSum/pixelCount]
+    return (rSum/pixelCount, gSum/pixelCount, bSum/pixelCount, aSum/pixelCount)
 
 def renderFrame(width, height, camPosition, camRotation):
     global g_cameraDistance
@@ -99,7 +101,7 @@ def initResources():
     global g_frameBufferID
     global g_screenTextureID
 
-    g_model = ObjModel(sys.argv[1])
+    g_model = ObjModel(sys.argv[2])
     glEnable(GL_CULL_FACE)
 
 ### Program Start
@@ -117,7 +119,7 @@ print(str(sys.argv))
 #     g_camRotation[2] = float(sys.argv[7])
 
 # load cli arguments
-if (len(sys.argv) != 5):
+if (len(sys.argv) != 6):
     print('Incorrect number of arguments given. I will now exit.')
     sys.exit(1)
 
@@ -128,11 +130,13 @@ cameraImagesFolder = sys.argv[4]
 outputPath = sys.argv[5]
 
 # create imgui context
+print("Creating imgui context...")
 imgui.create_context()
 if not glfw.init():
     sys.exit(1)
 
 # open textureAtlas
+print("Opening textureAtlas...")
 textureImage = Image.open(atlasPath)
 textureWidth = textureImage.size[0]
 textureHeight = textureImage.size[1]
@@ -143,19 +147,21 @@ g_yFovDeg = fovCalc(32)
 window, impl = None, None
 
 # look through images.txt
+print("Scanning through images.txt...")
 with open(txtPath, 'r') as fp:
     # for each line
-    ln = fp.readLine()
+    ln = fp.readline()
     count = 1
     while ln:
         ln = ln.split()
-        if ln[0] == str(count):
+        if ln[0].isnumeric(): # hack to check that line starts with an integer
             count += 1
             # open camera image
-            cameraImage = Image.open(cameraImagesFolder + ln[9]).load()
+            cameraImage = Image.open(cameraImagesFolder + ln[9])
+            cameraPixels = cameraImage.load()
             if window == None:
                 # init glfw
-                window, impl = initGlFwAndResources("Atlas generator", cameraImage.size[0], cameraImage.size[1], initResources)
+                window, impl = magic.initGlFwAndResources("Atlas generator", cameraImage.size[0], cameraImage.size[1], initResources)
             # convert quarternion -> (rx, ry, rz) and get (x, y, z)
             rx, ry, rz = quarternion_to_euler(
                 float(ln[1]),
@@ -166,12 +172,14 @@ with open(txtPath, 'r') as fp:
 
             x, y, z = float(ln[5]), float(ln[6]), float(ln[7])
             # render model from camera pose
-            uvMap = renderFrame(width, height, (x, y, z), (rx, ry, rz))
-            imgui.render() # do I need this?
+            uvMap = renderFrame(cameraImage.size[0], cameraImage.size[1], (x, y, z), (rx, ry, rz))
+            print([x, y, z], [rx, ry, rz])
+            # uvMap.show()
+            # imgui.render() # do I need this?
             uvPixels = uvMap.load()
             # for pixel in image
-            for i in range(uvPixels.size[0]):
-                for j in range(uvPixels.size[1]):
+            for i in range(uvMap.size[0]):
+                for j in range(uvMap.size[1]):
                     if (uvPixels[i, j][3] == 0): continue
                     # put pixel into texture atlas
                     u = round(textureWidth * pixel[0])
@@ -183,9 +191,9 @@ with open(txtPath, 'r') as fp:
             # for pixel in image, set as average of colours
             for i in range(len(textureAtlas)):
                 for j in range(len(textureAtlas[i])):
-                    texturePixels[i, j] = averageColor(textureAtlas[i, j])
+                    texturePixels[i, j] = averageColor(textureAtlas[i][j])
 
-        ln = fp.readLine()
+        ln = fp.readline()
 fp.close()
 
  # export texture atlas
