@@ -11,6 +11,11 @@ import magic
 # We import the 'lab_utils' module as 'lu' to save a bit of typing while still clearly marking where the code came from.
 import lab_utils as lu
 from ObjModel import ObjModel
+import numpy as np
+
+# %matplotlib inline
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 g_cameraDistance = 45
 g_yFovDeg = 56.9
@@ -108,26 +113,16 @@ def initResources():
 
 print("The arguments are:")
 print(str(sys.argv))
-
-# if len(sys.argv) >= 8:
-#     g_lookPos[0] = float(sys.argv[2])
-#     g_lookPos[1] = float(sys.argv[3])
-#     g_lookPos[2] = float(sys.argv[4])
-
-#     g_camRotation[0] = float(sys.argv[5])
-#     g_camRotation[1] = float(sys.argv[6])
-#     g_camRotation[2] = float(sys.argv[7])
-
 # load cli arguments
 if (len(sys.argv) != 6):
     print('Incorrect number of arguments given. I will now exit.')
     sys.exit(1)
 
-atlasPath = sys.argv[1]
-objPath = sys.argv[2]
-txtPath = sys.argv[3]
+atlasPath = sys.argv[1] #empy texture map to be filled
+objPath = sys.argv[2] #untextured model
+txtPath = sys.argv[3] #images.txt
 cameraImagesFolder = sys.argv[4]
-outputPath = sys.argv[5]
+outputPath = sys.argv[5] #texture map filled
 
 # create imgui context
 print("Creating imgui context...")
@@ -137,10 +132,12 @@ if not glfw.init():
 
 # open textureAtlas
 print("Opening textureAtlas...")
+images_count = 60
 textureImage = Image.open(atlasPath)
 textureWidth = textureImage.size[0]
 textureHeight = textureImage.size[1]
-textureAtlas = [[[] for x in range(textureWidth)] for y in range(textureHeight)]
+textureAtlas = np.zeros((textureWidth,textureHeight,3))
+textureAtlas_list = np.zeros((images_count+1, textureWidth, textureHeight ,3))
 
 # init params
 g_yFovDeg = fovCalc(32)
@@ -152,7 +149,8 @@ with open(txtPath, 'r', encoding="utf8") as fp:
     # for each line
     ln = fp.readline()
     count = 1
-    while ln:
+    # while ln:
+    while count<images_count:
         ln = ln.split()
         if ln[0].isnumeric(): # hack to check that line starts with an integer
             count += 1
@@ -173,30 +171,33 @@ with open(txtPath, 'r', encoding="utf8") as fp:
             x, y, z= float(ln[5]), float(ln[6]), float(ln[7])
             # render model from camera pose
             uvMap = renderFrame(cameraImage.size[0], cameraImage.size[1], (x, y, z), (rx, ry, rz))
-            print([x, y, z], [rx, ry, rz])
             # uvMap.show()
             # imgui.render() # do I need this?
+
             uvPixels = uvMap.load()
             # for pixel in image
             for i in range(uvMap.size[0]):
                 for j in range(uvMap.size[1]):
                     if (uvPixels[i, j][3] == 0): continue
                     # put pixel into texture atlas
-                    u = round(textureWidth * pixel[0])
-                    v = round(textureHeight * pixel[1])
-                    textureAtlas[u, v].append(cameraPixels[i, j])
-
-            # create texture atlas image
-            texturePixels = textureImage.load()
-            # for pixel in image, set as average of colours
-            for i in range(len(textureAtlas)):
-                for j in range(len(textureAtlas[i])):
-                    texturePixels[i, j] = averageColor(textureAtlas[i][j])
+                    u = round(textureWidth * uvPixels[i, j][0]/255)-1
+                    v = round(textureHeight * uvPixels[i, j][1]/255)-1
+                    textureAtlas[u][v] = cameraPixels[i, j]
+            textureAtlas_list[count] = textureAtlas
 
         ln = fp.readline()
+        print(float(count/images_count))
 fp.close()
 
- # export texture atlas
-textureImage.save(outputPath)
-print("Successfully generated texture atlas")
+textureAtlas = np.average(textureAtlas_list, axis=0)
+print(textureAtlas.min())
+print(textureAtlas.max())
+print(textureAtlas.mean())
+plt.imshow(textureAtlas)
+plt.show()
 
+# export texture atlas
+plt.savefig(outputPath)
+
+# textureAtlas.save(outputPath)
+print("Successfully generated texture atlas")
