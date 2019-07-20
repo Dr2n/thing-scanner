@@ -156,10 +156,10 @@ with open(txtPath, 'r', encoding="utf8") as fp:
             count += 1
             # open camera image
             cameraImage = Image.open(cameraImagesFolder + ln[9])
-            cameraPixels = cameraImage.load()
+            cameraImage = np.array(cameraImage.getdata()).reshape(cameraImage.size[0], cameraImage.size[1], 3)
             if window == None:
                 # init glfw
-                window, impl = magic.initGlFwAndResources("Atlas generator", cameraImage.size[0], cameraImage.size[1], initResources)
+                window, impl = magic.initGlFwAndResources("Atlas generator", cameraImage.shape[0], cameraImage.shape[1], initResources)
             # convert quarternion -> (rx, ry, rz) and get (x, y, z)
             rx, ry, rz = quarternion_to_euler(
                 float(ln[1]),
@@ -170,7 +170,7 @@ with open(txtPath, 'r', encoding="utf8") as fp:
 
             x, y, z= float(ln[5]), float(ln[6]), float(ln[7])
             # render model from camera pose
-            uvMap = renderFrame(cameraImage.size[0], cameraImage.size[1], (x, y, z), (rx, ry, rz))
+            uvMap = renderFrame(cameraImage.shape[0], cameraImage.shape[1], (x, y, z), (rx, ry, rz))
             # uvMap.show()
             # imgui.render() # do I need this?
 
@@ -182,8 +182,12 @@ with open(txtPath, 'r', encoding="utf8") as fp:
                     # put pixel into texture atlas
                     u = round(textureWidth * uvPixels[i, j][0]/255)-1
                     v = round(textureHeight * uvPixels[i, j][1]/255)-1
-                    textureAtlas[u][v] = cameraPixels[i, j]
-            textureAtlas_list[count] = textureAtlas
+                    textureAtlas[u][v] = cameraImage[i][j]
+            print("The next two lines are supposed to be equal(i think): ")
+            print(cameraImage.mean())
+            print(textureAtlas.mean()*255)
+
+            textureAtlas_list[count] = textureAtlas*255
 
         ln = fp.readline()
         print(float(count/images_count))
