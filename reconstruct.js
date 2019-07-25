@@ -1,30 +1,38 @@
 
-module.exports = function (videoName, err) {
+module.exports = function (videoName) {
+
     const config = require('./config.js')
     const { spawn } = require('child_process')
+
+    return new Promise((resolve, reject) => {
+        let uuid = videoName.split('.')[0]
+        let extension = videoName.split('.')[1]
     
-    let uuid = videoName.split('.')[0]
-    let extension = videoName.split('.')[1]
-
-    console.log(`Processing video ${uuid}...`)
-
-    // use ffmpeg to split the video into frame images
-    ffmpegJob(videoName)
-    // use colmap to do sparse reconstruction, output .ply file
-    .then(sparseReconstruction)
-    // export image pose data
-    .then(exportImageData)
-    // use colmap to export as .PLY
-    .then(exportModel)
-    // call poisson reconstruction program to create surface
-    .then(poissonSurface)
-    // use blender to add a UV map
-    .then(blenderUVMap)
-    // generate texture atlas
-    .then(generateTextureAtlas)
-    // put created model into a folder
-    .catch(err => {
-        console.log(err)
+        console.log(`Processing video ${uuid}...`)
+    
+        // use ffmpeg to split the video into frame images
+        ffmpegJob(videoName)
+        // use colmap to do sparse reconstruction, output .ply file
+        .then(sparseReconstruction)
+        // export image pose data
+        .then(exportImageData)
+        // use colmap to export as .PLY
+        .then(exportModel)
+        // call poisson reconstruction program to create surface
+        .then(poissonSurface)
+        // use blender to add a UV map
+        .then((poissonModel) => {
+            resolve()
+        }).catch(err => {
+            console.log(err)
+            reject(err)
+        })
+        
+        
+        //.then(blenderUVMap)
+        // generate texture atlas
+        //.then(generateTextureAtlas)
+        // put created model into a folder
     })
     
     // Functions

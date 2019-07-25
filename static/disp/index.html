@@ -1,0 +1,37 @@
+<!doctype HTML>
+<html>
+<script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+<script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+<script src="https://rawgit.com/donmccurdy/aframe-extras/v2.1.1/dist/aframe-extras.loaders.min.js"></script>
+  <body style='margin : 0px; overflow: hidden; background-color:black'>
+    <script>
+        let outputPath = 
+        document.body.innerHTML += `
+          <a-scene embedded arjs>
+            <a-assets>
+                <a-asset-item id="ply" src="${findGetParameter('model')}"></a-asset-item>
+            </a-assets>
+            
+            <a-entity ply-model="src: #ply" rotation='60 0 0' translation='20 20 -20'></a-entity>
+            <a-marker-camera preset="hiro">
+                <!-- <a-entity obj-model="obj: #obj; mtl: #mtl"></a-entity> -->
+            </a-marker-camera>
+            <!-- <a-entity camera></a-entity> -->
+          </a-scene>
+        `
+
+        function findGetParameter(parameterName) {
+          var result = null,
+              tmp = [];
+          location.search
+              .substr(1)
+              .split("&")
+              .forEach(function (item) {
+                tmp = item.split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+              });
+          return result;
+        }
+    </script>
+  </body>
+</html>

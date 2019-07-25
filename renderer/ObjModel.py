@@ -423,14 +423,17 @@ vec3 toSrgb(vec3 color)
 
 void main() 
 {
-	fragmentColor = vec4(v2f_texCoord[0], v2f_texCoord[1], 0., 1.);
+	//fragmentColor = vec4(v2f_texCoord[0], v2f_texCoord[1], 0., 1.);
+    
+    
+    
     // Manual alpha test (note: alpha test is no longer part of Opengl 3.3).
 	// if (texture(opacity_texture, v2f_texCoord).r < 0.5)
 	// {
 	// 	discard;
 	// } 
-	// vec3 materialDiffuse = texture(diffuse_texture, v2f_texCoord).xyz * material_diffuse_color;
-	// vec3 color = materialDiffuse * (0.1 + 0.9 * max(0.0, dot(v2f_viewSpaceNormal, -viewSpaceLightDirection))) + material_emissive_color;
-	// fragmentColor = vec4(toSrgb(color), material_alpha);
+	vec3 materialDiffuse = texture(diffuse_texture, v2f_texCoord).xyz * material_diffuse_color;
+	vec3 color = materialDiffuse * (0.1 + 0.9 * max(0.0, dot(v2f_viewSpaceNormal, -viewSpaceLightDirection))) + material_emissive_color;
+	fragmentColor = vec4(toSrgb(color), material_alpha);
 }
 """
