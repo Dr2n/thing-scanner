@@ -3,6 +3,7 @@ module.exports = function() {
     const { spawn } = require('child_process')
 
     return new Promise((resolve, reject) => {
+        // should delete previously saved videos and extracted frames
         Promise.all([
             deleteFolder('frames'),
             deleteFolder('videos')
