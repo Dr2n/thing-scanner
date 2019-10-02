@@ -30,6 +30,7 @@ module.exports = function() {
                 console.log(`stderr: ${data}`)
             })
         
+            // console on exit of rm
             deleteJob.on('close', (exitCode) => {
                 console.log(`rm -r closed with exit code ${exitCode}`)
                 if (exitCode != 0) {
