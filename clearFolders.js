@@ -1,3 +1,4 @@
+// start process to clear folders
 module.exports = function() {
     const { spawn } = require('child_process')
 
