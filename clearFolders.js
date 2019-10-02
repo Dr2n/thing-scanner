@@ -13,7 +13,7 @@ module.exports = function() {
         })
     })
 
-
+    // returns a promise for deleting a folder using rm
     function deleteFolder(dirPath) {
         return new Promise((resolve, reject) => {
             const deleteJob = spawn('rm', [
