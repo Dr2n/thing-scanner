@@ -5,11 +5,11 @@
 <script src="https://rawgit.com/donmccurdy/aframe-extras/v2.1.1/dist/aframe-extras.loaders.min.js"></script>
   <body style='margin : 0px; overflow: hidden; background-color:black'>
     <script>
-        let outputPath = 
+        let outputPath = '/models/recon.ply'
         document.body.innerHTML += `
           <a-scene embedded arjs>
             <a-assets>
-                <a-asset-item id="ply" src="${findGetParameter('model')}"></a-asset-item>
+                <a-asset-item id="ply" src="${outputPath}"></a-asset-item>
             </a-assets>
             
             <a-entity ply-model="src: #ply" rotation='60 0 0' translation='20 20 -20'></a-entity>

@@ -2,7 +2,7 @@ const PORT = 3000
 
 const express = require('express')
 const reconstruct = require('./reconstruct')
-const clean = require('./cleanFolders')
+const clearFolders = require('./clearFolders')
 const fileUpload = require('express-fileupload')
 const uuid = require('uuid/v4')
 const https = require('https')
@@ -36,7 +36,7 @@ server.post('/upload', (req, res) => {
     })
 })
 
-clean().then(() => {
+clearFolders().then(() => {
     https.createServer({
         key: fs.readFileSync('server.key'),
         cert: fs.readFileSync('server.cert')

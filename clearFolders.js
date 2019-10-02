@@ -1,4 +1,4 @@
-module.exorts = function() {
+module.exports = function() {
     const { spawn } = require('child_process')
 
     return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ module.exorts = function() {
                 '-rf', `./${dirPath}/*`
             ])
             
-            console.log(`Deleting ${}`)
+            console.log(`Deleting ${dirPath}`)
         
             deleteJob.stdout.on('data', (data) => {
                 console.log(data)
@@ -30,9 +30,9 @@ module.exorts = function() {
             })
         
             deleteJob.on('close', (exitCode) => {
-                console.log(`ffmpeg closed with exit code ${exitCode}`)
+                console.log(`rm -r closed with exit code ${exitCode}`)
                 if (exitCode != 0) {
-                    reject(`FFMPEG exited with error code: ${exitCode}`)
+                    reject(`rm -r exited with error code: ${exitCode}`)
                 } else {
                     console.log('Deleted successfully.')
                     resolve()

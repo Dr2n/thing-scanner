@@ -39,7 +39,7 @@ module.exports = function (videoName) {
     function ffmpegJob(videoName) {
         return new Promise((resolve, reject) => {
             const ffmpegJob = spawn('ffmpeg', [
-                '-i', `./videos/${videoName}`, '-vf', 'select=not(mod(n\\,5))',
+                '-i', `./videos/${videoName}`, '-vf', 'select=not(mod(n\\,15))',
                 '-vsync', 'vfr', '-q:v', '2', './frames/img_%03d.jpg'
             ])
         
@@ -71,8 +71,10 @@ module.exports = function (videoName) {
                 '--image_path', './frames'
             ])
 
+            console.log("Running sparse reconstruction")
+
             colmapJob.stdout.on('data', (data) => {
-                console.log(`colmap stdout:  ${data}`)
+                console.log(data)
             })
         
             colmapJob.stderr.on('data', (data) => {
