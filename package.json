@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/Dr2n/thing-scanner#readme",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-fileupload": "^1.1.5",
     "uuid": "^3.3.2"
   }
